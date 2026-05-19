@@ -5,6 +5,10 @@ export const metadata: Metadata = {
   title: "Prode Mundialista N360 / Negro Padel",
   description: "Pronosticá los partidos del Mundial 2026 y competí con tus amigos",
   manifest: "/manifest.json",
+  icons: {
+    icon: "/favicon.png",
+    apple: "/icon-512.png",
+  },
   appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "Prode N360" },
 };
 
