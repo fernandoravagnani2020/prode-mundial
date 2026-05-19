@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getDb } from "@/lib/db";
+import { dbAll } from "@/lib/db";
 import { ADMIN_DNIS } from "@/lib/types";
 
 export async function GET(req: NextRequest) {
@@ -10,15 +10,14 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "No autorizado" }, { status: 403 });
   }
 
-  const db = getDb();
-  const users = db.prepare(`
+  const users = await dbAll(`
     SELECT u.dni, u.name, u.is_admin, u.created_at,
            COUNT(p.id) as total_predictions
     FROM users u
     LEFT JOIN predictions p ON u.dni = p.user_dni
     GROUP BY u.dni
     ORDER BY u.created_at DESC
-  `).all();
+  `);
 
   return NextResponse.json({ users });
 }
