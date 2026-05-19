@@ -43,7 +43,7 @@ export default function Navigation() {
   return (
     <>
       {/* Top bar */}
-      <header className="bg-[#0a0a0a] border-b border-[#1a1a1a] px-4 py-3 flex items-center justify-between sticky top-0 z-50">
+      <header className="bg-[#0a0a0a] border-b border-[#1a1a1a] px-4 py-3 flex items-center justify-between sticky top-0 z-50 pt-safe">
         <div className="flex items-center gap-2.5">
           <div className="relative w-8 h-8">
             <Image src="/logo.png" alt="Logo" fill className="object-contain" />

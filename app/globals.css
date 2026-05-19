@@ -28,3 +28,4 @@ input[type="number"] { -moz-appearance: textfield; }
 
 /* Safe area inset for notched phones */
 .pb-safe { padding-bottom: max(1rem, env(safe-area-inset-bottom)); }
+.pt-safe { padding-top: env(safe-area-inset-top); }
