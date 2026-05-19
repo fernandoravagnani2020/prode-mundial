@@ -25,7 +25,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="es">
       <head>
-        <link rel="apple-touch-icon" href="/logo.png" />
+        <link rel="apple-touch-icon" sizes="512x512" href="/icon-512.png" />
+        <link rel="apple-touch-icon" sizes="192x192" href="/icon-192.png" />
       </head>
       <body>
         {children}
