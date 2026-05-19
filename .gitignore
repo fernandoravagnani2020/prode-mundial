@@ -24,9 +24,9 @@ npm-debug.log*
 # OS
 .DS_Store
 
-# large source files left in root
-*.JPG
-*.jpg
-*.png
-*.zip
-logo nuevo.png
+# large source files left in root (not in public/)
+/*.JPG
+/*.jpg
+/*.png
+/*.zip
+/logo nuevo.png
