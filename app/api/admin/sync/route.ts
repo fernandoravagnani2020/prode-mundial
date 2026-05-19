@@ -30,7 +30,7 @@ async function syncFromApi(apiKey: string) {
     };
     const FLAG_MAP: Record<string, string> = {
       // CONMEBOL
-      ARG: "🇦🇷", BRA: "🇧🇷", COL: "🇨🇴", ECU: "🇪🇨", URU: "🇺🇾",
+      ARG: "🇦🇷", BRA: "🇧🇷", COL: "🇨🇴", ECU: "🇪🇨", URU: "🇺🇾", URY: "🇺🇾",
       PAR: "🇵🇾", CHI: "🇨🇱", VEN: "🇻🇪", BOL: "🇧🇴", PER: "🇵🇪",
       // UEFA
       FRA: "🇫🇷", ESP: "🇪🇸", GER: "🇩🇪", POR: "🇵🇹", ENG: "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
@@ -42,16 +42,19 @@ async function syncFromApi(apiKey: string) {
       // CONCACAF
       USA: "🇺🇸", MEX: "🇲🇽", CAN: "🇨🇦", PAN: "🇵🇦", CRC: "🇨🇷",
       HON: "🇭🇳", JAM: "🇯🇲", TTO: "🇹🇹", SLV: "🇸🇻", HAI: "🇭🇹",
+      CUW: "🇨🇼", CUR: "🇨🇼", GUA: "🇬🇹", NCA: "🇳🇮", BLZ: "🇧🇿",
       // CAF
       MAR: "🇲🇦", SEN: "🇸🇳", NGA: "🇳🇬", GHA: "🇬🇭", CMR: "🇨🇲",
-      EGY: "🇪🇬", ALG: "🇩🇿", CIV: "🇨🇮", TAN: "🇹🇿", RSA: "🇿🇦",
-      GUI: "🇬🇳", ANG: "🇦🇴", MLI: "🇲🇱", BFA: "🇧🇫", ZIM: "🇿🇼",
-      UGA: "🇺🇬", MOZ: "🇲🇿", NAM: "🇳🇦", COD: "🇨🇩", GAB: "🇬🇦",
+      EGY: "🇪🇬", ALG: "🇩🇿", CIV: "🇨🇮", TUN: "🇹🇳", TAN: "🇹🇿",
+      RSA: "🇿🇦", GUI: "🇬🇳", ANG: "🇦🇴", CPV: "🇨🇻", MLI: "🇲🇱",
+      BFA: "🇧🇫", ZIM: "🇿🇼", UGA: "🇺🇬", MOZ: "🇲🇿", NAM: "🇳🇦",
+      COD: "🇨🇩", GAB: "🇬🇦", LBA: "🇱🇾", SUD: "🇸🇩",
       // AFC
-      JPN: "🇯🇵", KOR: "🇰🇷", SAU: "🇸🇦", AUS: "🇦🇺", IRI: "🇮🇷",
-      IRN: "🇮🇷", IRQ: "🇮🇶", IDN: "🇮🇩", UZB: "🇺🇿", JOR: "🇯🇴",
-      QAT: "🇶🇦", CHN: "🇨🇳", KUW: "🇰🇼", BHR: "🇧🇭", OMA: "🇴🇲",
-      UAE: "🇦🇪", KGZ: "🇰🇬", TJK: "🇹🇯", PAL: "🇵🇸",
+      JPN: "🇯🇵", KOR: "🇰🇷", SAU: "🇸🇦", KSA: "🇸🇦", AUS: "🇦🇺",
+      IRI: "🇮🇷", IRN: "🇮🇷", IRQ: "🇮🇶", IDN: "🇮🇩", UZB: "🇺🇿",
+      JOR: "🇯🇴", QAT: "🇶🇦", CHN: "🇨🇳", KUW: "🇰🇼", BHR: "🇧🇭",
+      OMA: "🇴🇲", UAE: "🇦🇪", KGZ: "🇰🇬", TJK: "🇹🇯", PAL: "🇵🇸",
+      SYR: "🇸🇾", LIB: "🇱🇧",
       // OFC
       NZL: "🇳🇿",
     };
@@ -102,9 +105,12 @@ async function syncFromApi(apiKey: string) {
 
 async function seedFromLocal() {
   const statements = FIXTURE_MUNDIAL_2026.map((m) => ({
-    sql: `INSERT OR IGNORE INTO matches
+    sql: `INSERT INTO matches
             (external_id, phase, group_name, team1, team2, team1_flag, team2_flag, match_date, venue)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+          ON CONFLICT(external_id) DO UPDATE SET
+            team1_flag = excluded.team1_flag,
+            team2_flag = excluded.team2_flag`,
     args: [m.external_id, m.phase, m.group_name, m.team1, m.team2, m.team1_flag, m.team2_flag, m.match_date, m.venue ?? null],
   }));
 
