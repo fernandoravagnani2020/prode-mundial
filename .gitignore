@@ -1,0 +1,32 @@
+# dependencies
+node_modules/
+
+# Next.js
+.next/
+out/
+
+# production build
+build/
+
+# env files
+.env
+.env.local
+.env.production.local
+.env.development.local
+
+# database (local only — Railway mounts a persistent volume)
+data/
+
+# logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+
+# large source files left in root
+*.JPG
+*.jpg
+*.png
+*.zip
+logo nuevo.png
