@@ -25,8 +25,13 @@ async function syncFromApi(apiKey: string) {
     const data = await res.json();
 
     const PHASE_MAP: Record<string, string> = {
-      GROUP_STAGE: "group", ROUND_OF_32: "r32", ROUND_OF_16: "r16",
-      QUARTER_FINALS: "qf", SEMI_FINALS: "sf", FINAL: "f",
+      GROUP_STAGE: "group",
+      ROUND_OF_32: "r32", LAST_32: "r32",
+      ROUND_OF_16: "r16", LAST_16: "r16",
+      QUARTER_FINALS: "qf", LAST_8: "qf",
+      SEMI_FINALS: "sf", LAST_4: "sf",
+      THIRD_PLACE: "sf",
+      FINAL: "f", LAST_2: "f",
     };
     const FLAG_MAP: Record<string, string> = {
       // CONMEBOL
@@ -72,6 +77,7 @@ async function syncFromApi(apiKey: string) {
         sql: `INSERT INTO matches (external_id, phase, group_name, team1, team2, team1_flag, team2_flag, match_date, venue, score1, score2, status)
               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
               ON CONFLICT(external_id) DO UPDATE SET
+                phase = excluded.phase, group_name = excluded.group_name,
                 team1 = excluded.team1, team2 = excluded.team2,
                 team1_flag = excluded.team1_flag, team2_flag = excluded.team2_flag,
                 match_date = excluded.match_date, venue = excluded.venue,
