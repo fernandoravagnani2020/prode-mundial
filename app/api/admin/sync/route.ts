@@ -30,7 +30,7 @@ async function syncFromApi(apiKey: string) {
       ROUND_OF_16: "r16", LAST_16: "r16",
       QUARTER_FINALS: "qf", LAST_8: "qf",
       SEMI_FINALS: "sf", LAST_4: "sf",
-      THIRD_PLACE: "f",
+      THIRD_PLACE: "3p",
       FINAL: "f", LAST_2: "f",
     };
     const FLAG_MAP: Record<string, string> = {

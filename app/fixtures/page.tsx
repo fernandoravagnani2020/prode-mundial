@@ -13,6 +13,7 @@ const PHASES = [
   { key: "r16",   label: "Octavos" },
   { key: "qf",    label: "Cuartos" },
   { key: "sf",    label: "Semis" },
+  { key: "3p",    label: "3° Puesto" },
   { key: "f",     label: "Final" },
 ];
 
