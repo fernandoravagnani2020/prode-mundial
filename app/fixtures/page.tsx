@@ -35,20 +35,23 @@ function FixturesContent() {
   const [predictions, setPredictions] = useState<PredMap>({});
   const [loading, setLoading] = useState(true);
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (silent = false) => {
     if (!session) return;
-    setLoading(true);
+    if (!silent) setLoading(true);
     try {
       const res = await fetch(`/api/matches?dni=${session.dni}`);
       const data = await res.json();
       setMatches(data.matches ?? []);
       setPredictions(data.predictions ?? {});
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, [session]);
 
   useEffect(() => { load(); }, [load]);
+
+  // Refresco silencioso tras guardar un pronóstico (no resetea el scroll)
+  const refreshSilent = useCallback(() => { load(true); }, [load]);
 
   // Group matches by day (Buenos Aires timezone)
   const grouped = useMemo(() => {
@@ -159,7 +162,7 @@ function FixturesContent() {
                         match={m}
                         prediction={predictions[m.id] ?? null}
                         userDni={session?.dni ?? ""}
-                        onSaved={load}
+                        onSaved={refreshSilent}
                       />
                     ))}
                   </div>
