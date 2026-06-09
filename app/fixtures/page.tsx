@@ -1,9 +1,11 @@
 "use client";
 import { useEffect, useState, useCallback, useMemo } from "react";
+import Link from "next/link";
 import AuthGuard, { useSession } from "@/components/AuthGuard";
 import Navigation from "@/components/Navigation";
 import MatchCard from "@/components/MatchCard";
 import { Match } from "@/lib/types";
+import { SPECIAL_PRIZE, isSpecialOpen } from "@/lib/special";
 
 type PredMap = Record<number, { predicted_score1: number; predicted_score2: number; predicted_advancer: string | null; points: number | null }>;
 
@@ -71,6 +73,26 @@ function FixturesContent() {
       <Navigation />
 
       <main className="max-w-lg mx-auto px-4 pt-3">
+
+        {/* Banner concurso $250.000 — visible hasta el 17 de junio */}
+        {isSpecialOpen() && (
+          <Link href="/premios" className="block mb-4 group">
+            <div className="relative overflow-hidden rounded-2xl border border-[#f97316]/30 bg-gradient-to-r from-[#f97316]/20 via-[#1a1a1a] to-[#22c55e]/15 p-4 active:scale-[0.99] transition-transform">
+              <div className="absolute -top-8 -right-6 w-28 h-28 rounded-full bg-[#f97316]/25 blur-2xl" />
+              <div className="relative flex items-center gap-3">
+                <div className="text-3xl">🏆</div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] font-bold text-[#f97316] uppercase tracking-widest">Concurso especial</p>
+                  <p className="text-base font-black text-white leading-tight">
+                    Participá por <span className="text-[#22c55e]">{SPECIAL_PRIZE}</span>
+                  </p>
+                  <p className="text-[11px] text-gray-400 mt-0.5">Pronosticá campeón, goleadores y más · hasta el 17 jun</p>
+                </div>
+                <div className="text-[#22c55e] text-xl font-black">→</div>
+              </div>
+            </div>
+          </Link>
+        )}
 
         {/* Progress bar */}
         {!loading && totalPredictable > 0 && (

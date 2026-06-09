@@ -66,6 +66,21 @@ async function ensureSchema() {
             FOREIGN KEY (match_id) REFERENCES matches(id)
           )`,
         },
+        {
+          sql: `CREATE TABLE IF NOT EXISTS special_predictions (
+            user_dni TEXT PRIMARY KEY,
+            champion TEXT,
+            runner_up TEXT,
+            third TEXT,
+            fourth TEXT,
+            best_player TEXT,
+            best_goalkeeper TEXT,
+            young_star TEXT,
+            created_at TEXT NOT NULL DEFAULT (datetime('now')),
+            updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+            FOREIGN KEY (user_dni) REFERENCES users(dni)
+          )`,
+        },
       ], "write");
       // Migrations: add columns to existing DBs (ignore if they already exist)
       const migrations = [

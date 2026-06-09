@@ -3,6 +3,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Session } from "@/lib/types";
+import { isSpecialOpen } from "@/lib/special";
 import Image from "next/image";
 
 export default function Navigation() {
@@ -31,6 +32,13 @@ export default function Navigation() {
         <polyline points="18 20 18 10"/><polyline points="12 20 12 4"/><polyline points="6 20 6 14"/>
       </svg>
     )},
+    ...(isSpecialOpen() ? [{
+      href: "/premios", label: "Premios", icon: (active: boolean) => (
+        <svg className={`w-5 h-5 ${active ? "text-[#f97316]" : "text-gray-600"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5C6 4 6 9 6 9zM18 9h1.5a2.5 2.5 0 0 0 0-5C18 4 18 9 18 9z"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>
+        </svg>
+      )
+    }] : []),
     ...(session?.isAdmin ? [{
       href: "/admin", label: "Admin", icon: (active: boolean) => (
         <svg className={`w-5 h-5 ${active ? "text-[#f97316]" : "text-gray-600"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -78,7 +86,7 @@ export default function Navigation() {
                 className={`flex-1 flex flex-col items-center gap-1 py-3 transition-colors ${active ? "" : "opacity-60"}`}
               >
                 {tab.icon(active)}
-                <span className={`text-[10px] font-semibold tracking-wide ${active ? "text-[#22c55e]" : "text-gray-600"} ${tab.href === "/admin" && active ? "text-[#f97316]" : ""}`}>
+                <span className={`text-[10px] font-semibold tracking-wide ${active ? "text-[#22c55e]" : "text-gray-600"} ${(tab.href === "/admin" || tab.href === "/premios") && active ? "text-[#f97316]" : ""}`}>
                   {tab.label.toUpperCase()}
                 </span>
               </Link>
