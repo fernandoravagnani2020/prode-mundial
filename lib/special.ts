@@ -3,6 +3,10 @@
 export const SPECIAL_DEADLINE = new Date("2026-06-17T23:59:59-03:00");
 export const SPECIAL_PRIZE = "$250.000";
 
+// Premios del prode (ranking de partidos)
+export const PRODE_PRIZE_1 = "$100.000";
+export const PRODE_PRIZE_2 = "$50.000";
+
 export function isSpecialOpen(now: Date = new Date()): boolean {
   return now.getTime() <= SPECIAL_DEADLINE.getTime();
 }

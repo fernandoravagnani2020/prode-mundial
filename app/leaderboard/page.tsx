@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import AuthGuard, { useSession } from "@/components/AuthGuard";
 import Navigation from "@/components/Navigation";
 import { LeaderboardEntry } from "@/lib/types";
+import { PRODE_PRIZE_1, PRODE_PRIZE_2 } from "@/lib/special";
 
 function LeaderboardContent() {
   const session = useSession();
@@ -30,6 +31,24 @@ function LeaderboardContent() {
         <div className="mb-4">
           <h1 className="text-xl font-black text-white">Tabla de Posiciones</h1>
           <p className="text-xs text-gray-600 mt-0.5">Mundial 2026 · N360</p>
+        </div>
+
+        {/* Premios del prode */}
+        <div className="grid grid-cols-2 gap-2 mb-4">
+          <div className="rounded-2xl border border-yellow-500/30 bg-yellow-500/10 p-3 flex items-center gap-2.5">
+            <span className="text-2xl">🥇</span>
+            <div className="min-w-0">
+              <p className="text-[10px] text-gray-400 uppercase tracking-wide font-bold leading-none">1° Puesto</p>
+              <p className="text-base font-black text-yellow-400 leading-tight mt-0.5">{PRODE_PRIZE_1}</p>
+            </div>
+          </div>
+          <div className="rounded-2xl border border-[#242424] bg-[#1a1a1a] p-3 flex items-center gap-2.5">
+            <span className="text-2xl">🥈</span>
+            <div className="min-w-0">
+              <p className="text-[10px] text-gray-400 uppercase tracking-wide font-bold leading-none">2° Puesto</p>
+              <p className="text-base font-black text-gray-200 leading-tight mt-0.5">{PRODE_PRIZE_2}</p>
+            </div>
+          </div>
         </div>
 
         {loading ? (

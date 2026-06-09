@@ -93,7 +93,8 @@ function PremiosContent() {
               Participá por <span className="text-[#22c55e]">{SPECIAL_PRIZE}</span>
             </h1>
             <p className="text-gray-400 text-sm mt-2 leading-relaxed">
-              Completá tus pronósticos del Mundial. {open ? `Cierra el ${deadlineStr}.` : "El concurso ya cerró."}
+              {SPECIAL_PRIZE} para quien más aciertos tenga en estos 7 pronósticos.
+              {open ? ` Cierra el ${deadlineStr}.` : " El concurso ya cerró."}
             </p>
           </div>
         </div>
