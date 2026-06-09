@@ -20,8 +20,12 @@ export function calculatePoints(
     if (predResult === actualResult) points = 1;
   }
 
-  // Bonus eliminatorias: acertar quién clasifica → +1 punto
+  // Bonus eliminatorias: solo si el partido terminó EMPATADO (se definió por
+  // penales) y el usuario acertó qué equipo clasifica → +1 punto.
+  // Si el resultado fue decisivo en cancha, el ganador ya está en el marcador.
+  const actualDraw = score1 === score2;
   if (
+    actualDraw &&
     opts?.actualAdvancer &&
     opts?.predictedAdvancer &&
     opts.predictedAdvancer === opts.actualAdvancer

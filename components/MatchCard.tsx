@@ -47,7 +47,7 @@ export default function MatchCard({ match, prediction, userDni, onSaved }: Props
           match_id: match.id,
           predicted_score1: Number(s1),
           predicted_score2: Number(s2),
-          predicted_advancer: knockout ? advancer : null,
+          predicted_advancer: needsAdvancer ? advancer : null,
         }),
       });
       const data = await res.json();
@@ -195,14 +195,12 @@ export default function MatchCard({ match, prediction, userDni, onSaved }: Props
               </button>
             </div>
 
-            {/* Selector de quién clasifica (solo eliminatorias) */}
-            {knockout && (
-              <div className={`rounded-xl border p-2.5 transition-colors ${needsAdvancer && !advancer ? "border-[#f97316]/40 bg-[#f97316]/5" : "border-[#1e1e1e] bg-[#141414]"}`}>
+            {/* Selector de quién clasifica: solo si el pronóstico es empate (penales) */}
+            {needsAdvancer && (
+              <div className={`rounded-xl border p-2.5 transition-colors ${!advancer ? "border-[#f97316]/40 bg-[#f97316]/5" : "border-[#1e1e1e] bg-[#141414]"}`}>
                 <p className="text-[10px] text-gray-500 mb-1.5 flex items-center gap-1">
                   <span>🏆</span>
-                  {needsAdvancer
-                    ? "Empate: ¿quién clasifica? (alargue/penales)"
-                    : "¿Quién clasifica? (+1 pto de bonus)"}
+                  Empate: ¿quién pasa por penales? (+1 pto de bonus)
                 </p>
                 <div className="grid grid-cols-2 gap-2">
                   {(["team1", "team2"] as const).map((t) => {
