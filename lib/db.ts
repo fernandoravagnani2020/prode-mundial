@@ -46,6 +46,7 @@ async function ensureSchema() {
             venue TEXT,
             score1 INTEGER,
             score2 INTEGER,
+            winner_team TEXT,
             status TEXT NOT NULL DEFAULT 'scheduled'
           )`,
         },
@@ -56,6 +57,7 @@ async function ensureSchema() {
             match_id INTEGER NOT NULL,
             predicted_score1 INTEGER NOT NULL,
             predicted_score2 INTEGER NOT NULL,
+            predicted_advancer TEXT,
             points INTEGER,
             created_at TEXT NOT NULL DEFAULT (datetime('now')),
             updated_at TEXT NOT NULL DEFAULT (datetime('now')),
@@ -65,11 +67,18 @@ async function ensureSchema() {
           )`,
         },
       ], "write");
-      // Migration: add password_hash column if it doesn't exist yet
-      try {
-        await client.execute("ALTER TABLE users ADD COLUMN password_hash TEXT");
-      } catch {
-        // Column already exists — ignore
+      // Migrations: add columns to existing DBs (ignore if they already exist)
+      const migrations = [
+        "ALTER TABLE users ADD COLUMN password_hash TEXT",
+        "ALTER TABLE matches ADD COLUMN winner_team TEXT",
+        "ALTER TABLE predictions ADD COLUMN predicted_advancer TEXT",
+      ];
+      for (const sql of migrations) {
+        try {
+          await client.execute(sql);
+        } catch {
+          // Column already exists — ignore
+        }
       }
 
       initialized = true;

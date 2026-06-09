@@ -72,16 +72,21 @@ async function syncFromApi(apiKey: string) {
     const statements = matches.map((m: Record<string, unknown>) => {
       const homeCode = (m.homeTeam as Record<string, string>)?.tla ?? "";
       const awayCode = (m.awayTeam as Record<string, string>)?.tla ?? "";
-      const score = m.score as Record<string, Record<string, number | null>> | undefined;
+      const score = m.score as Record<string, unknown> | undefined;
+      const fullTime = score?.fullTime as Record<string, number | null> | undefined;
+      const apiWinner = score?.winner as string | null | undefined;
+      const winnerTeam =
+        apiWinner === "HOME_TEAM" ? "team1" : apiWinner === "AWAY_TEAM" ? "team2" : null;
       return {
-        sql: `INSERT INTO matches (external_id, phase, group_name, team1, team2, team1_flag, team2_flag, match_date, venue, score1, score2, status)
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        sql: `INSERT INTO matches (external_id, phase, group_name, team1, team2, team1_flag, team2_flag, match_date, venue, score1, score2, winner_team, status)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
               ON CONFLICT(external_id) DO UPDATE SET
                 phase = excluded.phase, group_name = excluded.group_name,
                 team1 = excluded.team1, team2 = excluded.team2,
                 team1_flag = excluded.team1_flag, team2_flag = excluded.team2_flag,
                 match_date = excluded.match_date, venue = excluded.venue,
                 score1 = excluded.score1, score2 = excluded.score2,
+                winner_team = excluded.winner_team,
                 status = excluded.status`,
         args: [
           String(m.id),
@@ -93,8 +98,9 @@ async function syncFromApi(apiKey: string) {
           FLAG_MAP[awayCode] ?? "🏳️",
           (m.utcDate as string) ?? new Date().toISOString(),
           (m.venue as string) ?? null,
-          score?.fullTime?.home ?? null,
-          score?.fullTime?.away ?? null,
+          fullTime?.home ?? null,
+          fullTime?.away ?? null,
+          winnerTeam,
           STATUS_MAP[m.status as string] ?? "scheduled",
         ],
       };
@@ -125,18 +131,24 @@ async function seedFromLocal() {
 }
 
 async function recalcularPuntos() {
-  const matches = await dbAll<{ id: number; score1: number; score2: number }>(
-    "SELECT id, score1, score2 FROM matches WHERE score1 IS NOT NULL AND score2 IS NOT NULL"
+  const matches = await dbAll<{ id: number; score1: number; score2: number; winner_team: string | null }>(
+    "SELECT id, score1, score2, winner_team FROM matches WHERE score1 IS NOT NULL AND score2 IS NOT NULL"
   );
 
   for (const m of matches) {
-    const preds = await dbAll<{ id: number; predicted_score1: number; predicted_score2: number }>(
-      "SELECT id, predicted_score1, predicted_score2 FROM predictions WHERE match_id = ?", [m.id]
+    const preds = await dbAll<{ id: number; predicted_score1: number; predicted_score2: number; predicted_advancer: string | null }>(
+      "SELECT id, predicted_score1, predicted_score2, predicted_advancer FROM predictions WHERE match_id = ?", [m.id]
     );
     if (preds.length) {
       await dbBatch(preds.map((p) => ({
         sql: "UPDATE predictions SET points = ? WHERE id = ?",
-        args: [calculatePoints(p.predicted_score1, p.predicted_score2, m.score1, m.score2), p.id],
+        args: [
+          calculatePoints(p.predicted_score1, p.predicted_score2, m.score1, m.score2, {
+            predictedAdvancer: p.predicted_advancer,
+            actualAdvancer: m.winner_team,
+          }),
+          p.id,
+        ],
       })));
     }
   }

@@ -18,7 +18,12 @@ export interface Match {
   venue: string | null;
   score1: number | null;
   score2: number | null;
+  winner_team: "team1" | "team2" | null;
   status: "scheduled" | "live" | "finished";
+}
+
+export function isKnockout(phase: string): boolean {
+  return phase !== "group";
 }
 
 export interface Prediction {
@@ -27,6 +32,7 @@ export interface Prediction {
   match_id: number;
   predicted_score1: number;
   predicted_score2: number;
+  predicted_advancer: "team1" | "team2" | null;
   points: number | null;
   created_at: string;
   updated_at: string;

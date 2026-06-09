@@ -5,7 +5,7 @@ import { calculatePoints } from "@/lib/scoring";
 
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const { dni, score1, score2, team1, team2, team1_flag, team2_flag, match_date, venue, status } = await req.json();
+  const { dni, score1, score2, team1, team2, team1_flag, team2_flag, match_date, venue, status, winner_team } = await req.json();
 
   if (!(ADMIN_DNIS as readonly string[]).includes(dni)) {
     return NextResponse.json({ error: "No autorizado" }, { status: 403 });
@@ -14,6 +14,9 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   const matchId = parseInt(id);
   const match = await dbGet("SELECT id FROM matches WHERE id = ?", [matchId]);
   if (!match) return NextResponse.json({ error: "Partido no encontrado" }, { status: 404 });
+
+  const advancer: string | null =
+    winner_team === "team1" || winner_team === "team2" ? winner_team : null;
 
   await dbRun(`
     UPDATE matches SET
@@ -25,7 +28,8 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       team2_flag = COALESCE(?, team2_flag),
       match_date = COALESCE(?, match_date),
       venue = COALESCE(?, venue),
-      status = COALESCE(?, status)
+      status = COALESCE(?, status),
+      winner_team = COALESCE(?, winner_team)
     WHERE id = ?
   `, [
     score1 ?? null, score2 ?? null,
@@ -33,17 +37,25 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     team1_flag ?? null, team2_flag ?? null,
     match_date ?? null, venue ?? null,
     status ?? null,
+    advancer,
     matchId,
   ]);
 
   if (score1 != null && score2 != null) {
-    const predictions = await dbAll<{ id: number; predicted_score1: number; predicted_score2: number }>(
-      "SELECT id, predicted_score1, predicted_score2 FROM predictions WHERE match_id = ?", [matchId]
+    const m = await dbGet<{ winner_team: string | null }>("SELECT winner_team FROM matches WHERE id = ?", [matchId]);
+    const predictions = await dbAll<{ id: number; predicted_score1: number; predicted_score2: number; predicted_advancer: string | null }>(
+      "SELECT id, predicted_score1, predicted_score2, predicted_advancer FROM predictions WHERE match_id = ?", [matchId]
     );
     if (predictions.length) {
       await dbBatch(predictions.map((p) => ({
         sql: "UPDATE predictions SET points = ? WHERE id = ?",
-        args: [calculatePoints(p.predicted_score1, p.predicted_score2, score1, score2), p.id],
+        args: [
+          calculatePoints(p.predicted_score1, p.predicted_score2, score1, score2, {
+            predictedAdvancer: p.predicted_advancer,
+            actualAdvancer: m?.winner_team ?? null,
+          }),
+          p.id,
+        ],
       })));
     }
   }

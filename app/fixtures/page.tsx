@@ -5,7 +5,7 @@ import Navigation from "@/components/Navigation";
 import MatchCard from "@/components/MatchCard";
 import { Match } from "@/lib/types";
 
-type PredMap = Record<number, { predicted_score1: number; predicted_score2: number; points: number | null }>;
+type PredMap = Record<number, { predicted_score1: number; predicted_score2: number; predicted_advancer: string | null; points: number | null }>;
 
 const TZ = "America/Argentina/Buenos_Aires";
 
