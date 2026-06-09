@@ -29,3 +29,8 @@ input[type="number"] { -moz-appearance: textfield; }
 /* Safe area inset for notched phones */
 .pb-safe { padding-bottom: max(1rem, env(safe-area-inset-bottom)); }
 .pt-safe { padding-top: env(safe-area-inset-top); }
+
+/* Sticky save bar sits right above the bottom nav (which is ~64px + safe area) */
+.save-bar { bottom: calc(64px + max(1rem, env(safe-area-inset-bottom))); }
+/* Bottom padding so scrollable content clears both the save bar and the nav */
+.pb-savebar { padding-bottom: calc(190px + env(safe-area-inset-bottom)); }

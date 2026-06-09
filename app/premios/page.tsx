@@ -79,7 +79,7 @@ function PremiosContent() {
   });
 
   return (
-    <div className="min-h-screen bg-bg pb-28">
+    <div className="min-h-screen bg-bg pb-savebar">
       <Navigation />
 
       <main className="max-w-lg mx-auto px-4 pt-4">
@@ -158,7 +158,7 @@ function PremiosContent() {
 
       {/* Sticky save bar */}
       {!loading && open && (
-        <div className="fixed bottom-[60px] left-0 right-0 z-40 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a] to-transparent pt-4 pb-3 px-4">
+        <div className="save-bar fixed left-0 right-0 z-40 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a] to-transparent pt-5 pb-2 px-4">
           <div className="max-w-lg mx-auto flex items-center gap-3">
             <span className="text-xs text-gray-600 whitespace-nowrap">
               <span className="text-[#22c55e] font-bold">{filledCount}</span>/{SPECIAL_FIELDS.length}
