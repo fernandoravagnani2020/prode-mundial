@@ -114,7 +114,7 @@ function AdminContent() {
         <div className="flex items-center justify-between mb-4">
           <div>
             <h1 className="text-xl font-black text-white">Panel Admin</h1>
-            <p className="text-xs text-gray-600">N360 / Negro Padel</p>
+            <p className="text-xs text-gray-600">N360</p>
           </div>
           <span className="text-[10px] font-bold text-[#f97316] bg-[#f97316]/10 border border-[#f97316]/20 px-2 py-1 rounded-full uppercase tracking-wide">Admin</span>
         </div>

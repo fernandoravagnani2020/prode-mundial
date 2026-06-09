@@ -1,7 +1,7 @@
 {
   "name": "Prode Mundialista N360",
   "short_name": "Prode N360",
-  "description": "Pronosticá el Mundial 2026 con Negro Padel",
+  "description": "Pronosticá el Mundial 2026 con N360",
   "start_url": "/fixtures",
   "display": "standalone",
   "background_color": "#0a0a0a",

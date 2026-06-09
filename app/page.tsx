@@ -99,7 +99,7 @@ export default function LoginPage() {
           <Image src="/logo.png" alt="Logo" fill className="object-contain" />
         </div>
         <h1 className="text-3xl font-black text-white tracking-tight">Prode Mundialista</h1>
-        <p className="text-[#f97316] font-bold text-sm mt-1 tracking-wide uppercase">N360 · Negro Padel</p>
+        <p className="text-[#f97316] font-bold text-sm mt-1 tracking-wide uppercase">N360</p>
         <p className="text-gray-500 text-xs mt-1">Copa del Mundo 2026</p>
       </div>
 

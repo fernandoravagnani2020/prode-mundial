@@ -50,7 +50,7 @@ export default function Navigation() {
           </div>
           <div className="leading-tight">
             <p className="text-[11px] font-black text-white tracking-tight whitespace-nowrap">Prode Mundialista</p>
-            <p className="text-[9px] text-[#f97316] font-bold tracking-widest uppercase whitespace-nowrap">N360 · Negro Padel</p>
+            <p className="text-[9px] text-[#f97316] font-bold tracking-widest uppercase whitespace-nowrap">N360</p>
           </div>
         </div>
         {session && (

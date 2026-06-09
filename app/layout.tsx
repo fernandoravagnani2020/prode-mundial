@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Prode Mundialista N360 / Negro Padel",
+  title: "Prode Mundialista N360",
   description: "Pronosticá los partidos del Mundial 2026 y competí con tus amigos",
   manifest: "/manifest.json",
   icons: {

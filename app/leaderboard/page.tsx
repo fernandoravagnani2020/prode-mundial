@@ -29,7 +29,7 @@ function LeaderboardContent() {
         {/* Header */}
         <div className="mb-4">
           <h1 className="text-xl font-black text-white">Tabla de Posiciones</h1>
-          <p className="text-xs text-gray-600 mt-0.5">Mundial 2026 · N360 / Negro Padel</p>
+          <p className="text-xs text-gray-600 mt-0.5">Mundial 2026 · N360</p>
         </div>
 
         {loading ? (
