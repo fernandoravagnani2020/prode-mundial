@@ -93,7 +93,7 @@ function PremiosContent() {
               Participá por <span className="text-[#22c55e]">{SPECIAL_PRIZE}</span>
             </h1>
             <p className="text-gray-400 text-sm mt-2 leading-relaxed">
-              {SPECIAL_PRIZE} para quien más aciertos tenga en estos 7 pronósticos.
+              Acertá las <span className="text-white font-semibold">7 predicciones</span> y ganás {SPECIAL_PRIZE}.
               {open ? ` Cierra el ${deadlineStr}.` : " El concurso ya cerró."}
             </p>
           </div>
@@ -106,6 +106,13 @@ function PremiosContent() {
           </div>
         ) : (
           <>
+            {open && (
+              <div className="bg-[#f97316]/10 border border-[#f97316]/25 rounded-xl px-4 py-2.5 mb-4 text-xs text-[#f97316] flex items-start gap-2">
+                <span>🎯</span>
+                <span>Para ganar tenés que acertar <span className="font-bold">las 7 predicciones</span>. ¡Completá todas!</span>
+              </div>
+            )}
+
             {!open && (
               <div className="bg-[#1a1a1a] border border-[#242424] rounded-xl px-4 py-3 mb-4 text-sm text-gray-400">
                 🔒 El concurso cerró el {deadlineStr}. Podés ver tus pronósticos pero ya no se pueden modificar.
