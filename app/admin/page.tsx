@@ -17,6 +17,8 @@ function AdminContent() {
   const [syncMsg, setSyncMsg] = useState("");
   const [confirmDelete, setConfirmDelete] = useState<AdminUser | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [resetting, setResetting] = useState<string | null>(null);
+  const [resetMsg, setResetMsg] = useState("");
   const [editMatch, setEditMatch] = useState<Match | null>(null);
   const [editScore1, setEditScore1] = useState("");
   const [editScore2, setEditScore2] = useState("");
@@ -77,6 +79,24 @@ function AdminContent() {
       const res = await fetch(`/api/admin/users/${u.dni}?admin_dni=${session.dni}`, { method: "DELETE" });
       if (res.ok) { setConfirmDelete(null); loadUsers(); }
     } finally { setDeleting(false); }
+  }
+
+  async function resetPassword(u: AdminUser) {
+    if (!session) return;
+    setResetting(u.dni); setResetMsg("");
+    try {
+      const res = await fetch(`/api/admin/users/${u.dni}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ admin_dni: session.dni }),
+      });
+      setResetMsg(res.ok
+        ? `✓ Contraseña reseteada a ${u.name}. En su próximo ingreso elige una nueva.`
+        : "✗ Error al resetear");
+      setTimeout(() => setResetMsg(""), 4000);
+    } catch {
+      setResetMsg("✗ Error de conexión");
+    } finally { setResetting(null); }
   }
 
   async function saveEdit() {
@@ -191,6 +211,11 @@ function AdminContent() {
             <div className="px-4 py-3 border-b border-[#1a1a1a]">
               <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">{users.length} participantes</p>
             </div>
+            {resetMsg && (
+              <div className={`px-4 py-2.5 text-xs font-medium border-b border-[#1a1a1a] ${resetMsg.startsWith("✓") ? "text-[#22c55e]" : "text-red-400"}`}>
+                {resetMsg}
+              </div>
+            )}
             {users.map((u) => (
               <div key={u.dni} className="px-4 py-3 border-b border-[#111111] last:border-0 flex items-center justify-between gap-2">
                 <div className="min-w-0">
@@ -200,12 +225,21 @@ function AdminContent() {
                   <p className="text-xs text-gray-600">DNI {u.dni} · {u.total_predictions} pronósticos · {new Date(u.created_at).toLocaleDateString("es-AR")}</p>
                 </div>
                 {!u.is_admin && (
-                  <button
-                    onClick={() => setConfirmDelete(u)}
-                    className="flex-shrink-0 text-xs text-red-500 hover:text-red-400 border border-red-900/50 hover:border-red-700/50 px-2.5 py-1.5 rounded-lg transition-colors"
-                  >
-                    Eliminar
-                  </button>
+                  <div className="flex-shrink-0 flex items-center gap-1.5">
+                    <button
+                      onClick={() => resetPassword(u)}
+                      disabled={resetting === u.dni}
+                      className="text-xs text-[#f97316] hover:text-[#fb923c] border border-[#f97316]/30 hover:border-[#f97316]/50 disabled:opacity-50 px-2.5 py-1.5 rounded-lg transition-colors"
+                    >
+                      {resetting === u.dni ? "..." : "Resetear"}
+                    </button>
+                    <button
+                      onClick={() => setConfirmDelete(u)}
+                      className="text-xs text-red-500 hover:text-red-400 border border-red-900/50 hover:border-red-700/50 px-2.5 py-1.5 rounded-lg transition-colors"
+                    >
+                      Eliminar
+                    </button>
+                  </div>
                 )}
               </div>
             ))}

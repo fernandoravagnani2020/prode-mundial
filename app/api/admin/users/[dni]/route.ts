@@ -2,6 +2,23 @@ import { NextRequest, NextResponse } from "next/server";
 import { dbRun, dbBatch } from "@/lib/db";
 import { ADMIN_DNIS } from "@/lib/types";
 
+// Resetea la contraseña de un usuario (la deja vacía) para que pueda
+// elegir una nueva en su próximo ingreso. No borra sus pronósticos.
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: Promise<{ dni: string }> }
+) {
+  const { dni: targetDni } = await params;
+  const { admin_dni } = await req.json();
+
+  if (!admin_dni || !(ADMIN_DNIS as readonly string[]).includes(admin_dni)) {
+    return NextResponse.json({ error: "No autorizado" }, { status: 403 });
+  }
+
+  await dbRun("UPDATE users SET password_hash = NULL WHERE dni = ?", [targetDni]);
+  return NextResponse.json({ success: true });
+}
+
 export async function DELETE(
   req: NextRequest,
   { params }: { params: Promise<{ dni: string }> }
