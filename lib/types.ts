@@ -8,7 +8,7 @@ export interface User {
 export interface Match {
   id: number;
   external_id: string | null;
-  phase: "group" | "r32" | "r16" | "qf" | "sf" | "f";
+  phase: "group" | "r32" | "r16" | "qf" | "sf" | "3p" | "f";
   group_name: string | null;
   team1: string;
   team2: string;

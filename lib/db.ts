@@ -28,6 +28,7 @@ async function ensureSchema() {
             dni TEXT PRIMARY KEY,
             name TEXT NOT NULL,
             is_admin INTEGER NOT NULL DEFAULT 0,
+            password_hash TEXT,
             created_at TEXT NOT NULL DEFAULT (datetime('now'))
           )`,
         },
@@ -64,6 +65,13 @@ async function ensureSchema() {
           )`,
         },
       ], "write");
+      // Migration: add password_hash column if it doesn't exist yet
+      try {
+        await client.execute("ALTER TABLE users ADD COLUMN password_hash TEXT");
+      } catch {
+        // Column already exists — ignore
+      }
+
       initialized = true;
     })();
   }
