@@ -77,20 +77,20 @@ function LeaderboardContent() {
               </div>
             )}
 
-            {/* Podio top 3 */}
+            {/* Podio top 3 — orden 1°, 2°, 3° de izquierda a derecha */}
             {podium.length > 0 && (
               <div className="grid grid-cols-3 gap-2 mb-4">
-                {[podium[1], podium[0], podium[2]].map((e, visualIdx) => {
+                {[podium[0], podium[1], podium[2]].map((e, visualIdx) => {
                   if (!e) return <div key={visualIdx} />;
                   const isFirst = e.rank === 1;
                   const isMe = e.dni === session?.dni;
-                  const medal = ["🥈","🥇","🥉"][visualIdx];
+                  const medal = ["🥇","🥈","🥉"][visualIdx];
                   return (
                     <div
                       key={e.dni}
                       className={`flex flex-col items-center p-3 rounded-2xl border text-center transition-all ${
                         isFirst
-                          ? "bg-yellow-500/10 border-yellow-500/30 order-2"
+                          ? "bg-yellow-500/10 border-yellow-500/30"
                           : "bg-[#1a1a1a] border-[#242424]"
                       } ${isMe ? "ring-1 ring-[#22c55e]/50" : ""}`}
                     >
