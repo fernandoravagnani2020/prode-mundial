@@ -28,6 +28,19 @@ function AdminContent() {
   const [editVenue, setEditVenue] = useState("");
   const [saving, setSaving] = useState(false);
   const [phaseFilter, setPhaseFilter] = useState("group");
+  // Mantenimiento / limpieza de partidos huérfanos
+  type CleanupReport = {
+    total: number; apiCount: number; orphanCount: number; orphanPredTotal: number;
+    orphanDetail: { id: number; external_id: string | null; teams: string; phase: string; predictions: number }[];
+  };
+  type CleanupResult = {
+    backup: string; deleted: number; keptWithPredictions: number; apiMatches: number;
+    keptDetail: { teams: string; phase: string; predictions: number }[];
+  };
+  const [cleanupReport, setCleanupReport] = useState<CleanupReport | null>(null);
+  const [cleanupResult, setCleanupResult] = useState<CleanupResult | null>(null);
+  const [cleanupBusy, setCleanupBusy] = useState(false);
+  const [confirmCleanup, setConfirmCleanup] = useState(false);
 
   const loadMatches = useCallback(async () => {
     const res = await fetch(`/api/matches?phase=${phaseFilter}`);
@@ -99,6 +112,35 @@ function AdminContent() {
     } finally { setResetting(null); }
   }
 
+  async function analizarLimpieza() {
+    if (!session) return;
+    setCleanupBusy(true); setCleanupResult(null);
+    try {
+      const res = await fetch(`/api/admin/cleanup?dni=${session.dni}`);
+      const data = await res.json();
+      if (res.ok) setCleanupReport(data);
+    } finally { setCleanupBusy(false); }
+  }
+
+  async function ejecutarLimpieza() {
+    if (!session) return;
+    setCleanupBusy(true);
+    try {
+      const res = await fetch("/api/admin/cleanup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ dni: session.dni }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setCleanupResult(data);
+        setCleanupReport(null);
+        setConfirmCleanup(false);
+        loadMatches();
+      }
+    } finally { setCleanupBusy(false); }
+  }
+
   async function saveEdit() {
     if (!editMatch || !session) return;
     setSaving(true);
@@ -166,6 +208,72 @@ function AdminContent() {
                 </button>
               </div>
               {syncMsg && <p className={`text-xs mt-2 font-medium ${syncMsg.startsWith("✓") ? "text-[#22c55e]" : "text-red-400"}`}>{syncMsg}</p>}
+            </div>
+
+            {/* Mantenimiento: limpiar partidos huérfanos */}
+            <div className="bg-card border border-[#242424] rounded-2xl p-4 mb-4">
+              <div className="flex items-center justify-between">
+                <div className="min-w-0">
+                  <p className="text-sm font-bold text-white">Limpiar partidos huérfanos</p>
+                  <p className="text-xs text-gray-600 mt-0.5">Saca partidos que no son del fixture oficial</p>
+                </div>
+                <button onClick={analizarLimpieza} disabled={cleanupBusy}
+                  className="bg-[#1a1a1a] border border-[#2e2e2e] hover:border-[#3e3e3e] disabled:opacity-50 text-gray-300 text-xs font-bold px-4 py-2 rounded-xl transition-all active:scale-95">
+                  {cleanupBusy && !confirmCleanup ? "Analizando..." : "Analizar"}
+                </button>
+              </div>
+
+              {/* Reporte del análisis */}
+              {cleanupReport && (
+                <div className="mt-3 pt-3 border-t border-[#1a1a1a] text-xs space-y-1.5">
+                  <p className="text-gray-400">Partidos en la base: <span className="text-white font-bold">{cleanupReport.total}</span></p>
+                  <p className="text-[#22c55e]">✓ Oficiales (API): <span className="font-bold">{cleanupReport.apiCount}</span></p>
+                  <p className="text-[#f97316]">⚠ Huérfanos: <span className="font-bold">{cleanupReport.orphanCount}</span>
+                    {cleanupReport.orphanPredTotal > 0 && <span className="text-gray-500"> · {cleanupReport.orphanPredTotal} con pronósticos (se conservan)</span>}
+                  </p>
+
+                  {cleanupReport.orphanCount > 0 ? (
+                    <div className="pt-2">
+                      <p className="text-gray-500 mb-2">
+                        Se hará un <span className="text-white font-semibold">backup completo</span> y se borrarán {cleanupReport.orphanDetail.filter(m => m.predictions === 0).length} huérfanos sin pronósticos.
+                        Los partidos con pronósticos NO se tocan.
+                      </p>
+                      {!confirmCleanup ? (
+                        <button onClick={() => setConfirmCleanup(true)}
+                          className="w-full bg-[#f97316]/15 border border-[#f97316]/40 text-[#f97316] text-xs font-bold py-2.5 rounded-xl">
+                          Hacer backup y limpiar
+                        </button>
+                      ) : (
+                        <div className="flex gap-2">
+                          <button onClick={() => setConfirmCleanup(false)} disabled={cleanupBusy}
+                            className="flex-1 bg-[#1a1a1a] border border-[#2e2e2e] text-gray-400 text-xs font-bold py-2.5 rounded-xl">
+                            Cancelar
+                          </button>
+                          <button onClick={ejecutarLimpieza} disabled={cleanupBusy}
+                            className="flex-1 bg-[#f97316] hover:bg-[#ea580c] disabled:opacity-50 text-black text-xs font-black py-2.5 rounded-xl">
+                            {cleanupBusy ? "Procesando..." : "Confirmar"}
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="text-[#22c55e] pt-1">✓ No hay partidos huérfanos. Todo limpio.</p>
+                  )}
+                </div>
+              )}
+
+              {/* Resultado de la limpieza */}
+              {cleanupResult && (
+                <div className="mt-3 pt-3 border-t border-[#1a1a1a] text-xs space-y-1">
+                  <p className="text-[#22c55e] font-bold">✓ Limpieza completada</p>
+                  <p className="text-gray-400">Backup guardado: <span className="text-white font-mono">{cleanupResult.backup}</span></p>
+                  <p className="text-gray-400">Partidos borrados: <span className="text-white font-bold">{cleanupResult.deleted}</span></p>
+                  <p className="text-gray-400">Oficiales restantes: <span className="text-white font-bold">{cleanupResult.apiMatches}</span></p>
+                  {cleanupResult.keptWithPredictions > 0 && (
+                    <p className="text-[#f97316]">⚠ {cleanupResult.keptWithPredictions} huérfanos con pronósticos se conservaron (revisalos manualmente).</p>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Phase filter */}
