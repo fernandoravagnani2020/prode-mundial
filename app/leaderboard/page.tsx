@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import AuthGuard, { useSession } from "@/components/AuthGuard";
 import Navigation from "@/components/Navigation";
 import { LeaderboardEntry } from "@/lib/types";
@@ -9,13 +9,32 @@ function LeaderboardContent() {
   const session = useSession();
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
-    fetch("/api/leaderboard")
-      .then((r) => r.json())
-      .then((d) => setEntries(d.leaderboard ?? []))
-      .finally(() => setLoading(false));
+  const load = useCallback(async (silent = false) => {
+    if (silent) setRefreshing(true); else setLoading(true);
+    try {
+      const r = await fetch("/api/leaderboard", { cache: "no-store" });
+      const d = await r.json();
+      setEntries(d.leaderboard ?? []);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
   }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  // Refrescar al volver a la pestaña/pantalla (sin spinner de carga completa)
+  useEffect(() => {
+    const onFocus = () => load(true);
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onFocus);
+    return () => {
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onFocus);
+    };
+  }, [load]);
 
   const myEntry = entries.find((e) => e.dni === session?.dni);
 
@@ -28,9 +47,19 @@ function LeaderboardContent() {
 
       <main className="max-w-lg mx-auto px-4 pt-3">
         {/* Header */}
-        <div className="mb-4">
-          <h1 className="text-xl font-black text-white">Tabla de Posiciones</h1>
-          <p className="text-xs text-gray-600 mt-0.5">Mundial 2026 · N360</p>
+        <div className="mb-4 flex items-start justify-between gap-2">
+          <div>
+            <h1 className="text-xl font-black text-white">Tabla de Posiciones</h1>
+            <p className="text-xs text-gray-600 mt-0.5">Mundial 2026 · N360</p>
+          </div>
+          <button
+            onClick={() => load(true)}
+            disabled={refreshing}
+            className="flex-shrink-0 text-xs text-gray-400 hover:text-white border border-[#242424] hover:border-[#3a3a3a] px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5"
+          >
+            <span className={refreshing ? "animate-spin inline-block" : "inline-block"}>↻</span>
+            {refreshing ? "Actualizando" : "Actualizar"}
+          </button>
         </div>
 
         {/* Premios del prode */}
