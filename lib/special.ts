@@ -1,6 +1,6 @@
 // Predicciones especiales — concurso de los $250.000
-// Cierra el 17 de junio de 2026 a la medianoche (hora Argentina, UTC-3)
-export const SPECIAL_DEADLINE = new Date("2026-06-17T23:59:59-03:00");
+// Cierra el 26 de junio de 2026 a la medianoche (hora Argentina, UTC-3)
+export const SPECIAL_DEADLINE = new Date("2026-06-26T23:59:59-03:00");
 export const SPECIAL_PRIZE = "$250.000";
 
 // Premios del prode (ranking de partidos)
