@@ -66,9 +66,11 @@ function FixturesContent() {
   // Refresco silencioso tras guardar un pronóstico (no resetea el scroll)
   const refreshSilent = useCallback(() => { load(true); }, [load]);
 
-  // Separar partidos jugados (ya empezaron o terminaron) de los próximos
+  // Un partido pasa al bloque "jugados" 1 hora después de terminar.
+  // Como no guardamos la hora de fin, usamos: inicio + ~2h de partido + 1h de margen.
+  const PLAYED_AFTER_MS = 3 * 60 * 60 * 1000;
   const now = Date.now();
-  const isPlayed = (m: Match) => m.status === "finished" || new Date(m.match_date).getTime() <= now;
+  const isPlayed = (m: Match) => new Date(m.match_date).getTime() + PLAYED_AFTER_MS <= now;
   const playedMatches = matches.filter(isPlayed);
   const upcomingMatches = matches.filter((m) => !isPlayed(m));
 
