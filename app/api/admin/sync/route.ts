@@ -73,10 +73,41 @@ async function syncFromApi(apiKey: string) {
       const homeCode = (m.homeTeam as Record<string, string>)?.tla ?? "";
       const awayCode = (m.awayTeam as Record<string, string>)?.tla ?? "";
       const score = m.score as Record<string, unknown> | undefined;
+      const duration = score?.duration as string | undefined;
       const fullTime = score?.fullTime as Record<string, number | null> | undefined;
+      const regularTime = score?.regularTime as Record<string, number | null> | undefined;
+      const extraTime = score?.extraTime as Record<string, number | null> | undefined;
+      const penalties = score?.penalties as Record<string, number | null> | undefined;
+
+      // Marcador del prode: resultado EN CANCHA (tiempo regular + alargue),
+      // SIN los penales. La API suma todo en `fullTime` (ej: 1-1 que se define
+      // 4-2 por penales aparece como 5-3), así que en eliminatorias reconstruimos
+      // el marcador desde regularTime + extraTime. Si la API no envía esos campos
+      // (partidos normales decididos en los 90'), usamos fullTime directo.
+      const decidedAfter90 =
+        duration === "PENALTY_SHOOTOUT" || duration === "EXTRA_TIME";
+      const hasSplit = regularTime != null || extraTime != null;
+      let score1: number | null;
+      let score2: number | null;
+      if (decidedAfter90 && hasSplit) {
+        score1 = (regularTime?.home ?? 0) + (extraTime?.home ?? 0);
+        score2 = (regularTime?.away ?? 0) + (extraTime?.away ?? 0);
+      } else {
+        score1 = fullTime?.home ?? null;
+        score2 = fullTime?.away ?? null;
+      }
+
+      // Clasificado: el ganador que informa la API. Si fue por penales y la API
+      // no marca winner, lo derivamos del marcador de la tanda.
       const apiWinner = score?.winner as string | null | undefined;
-      const winnerTeam =
+      let winnerTeam =
         apiWinner === "HOME_TEAM" ? "team1" : apiWinner === "AWAY_TEAM" ? "team2" : null;
+      if (!winnerTeam && duration === "PENALTY_SHOOTOUT" && penalties) {
+        const ph = penalties.home ?? 0;
+        const pa = penalties.away ?? 0;
+        if (ph > pa) winnerTeam = "team1";
+        else if (pa > ph) winnerTeam = "team2";
+      }
       return {
         sql: `INSERT INTO matches (external_id, phase, group_name, team1, team2, team1_flag, team2_flag, match_date, venue, score1, score2, winner_team, status)
               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -98,8 +129,8 @@ async function syncFromApi(apiKey: string) {
           FLAG_MAP[awayCode] ?? "🏳️",
           (m.utcDate as string) ?? new Date().toISOString(),
           (m.venue as string) ?? null,
-          fullTime?.home ?? null,
-          fullTime?.away ?? null,
+          score1,
+          score2,
           winnerTeam,
           STATUS_MAP[m.status as string] ?? "scheduled",
         ],
