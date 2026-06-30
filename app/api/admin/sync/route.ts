@@ -102,11 +102,19 @@ async function syncFromApi(apiKey: string) {
       const apiWinner = score?.winner as string | null | undefined;
       let winnerTeam =
         apiWinner === "HOME_TEAM" ? "team1" : apiWinner === "AWAY_TEAM" ? "team2" : null;
-      if (!winnerTeam && duration === "PENALTY_SHOOTOUT" && penalties) {
-        const ph = penalties.home ?? 0;
-        const pa = penalties.away ?? 0;
-        if (ph > pa) winnerTeam = "team1";
-        else if (pa > ph) winnerTeam = "team2";
+      if (!winnerTeam && duration === "PENALTY_SHOOTOUT") {
+        const ph = penalties?.home ?? 0;
+        const pa = penalties?.away ?? 0;
+        if (ph !== pa) {
+          winnerTeam = ph > pa ? "team1" : "team2";
+        } else {
+          // El campo `penalties` puede venir vacío/empatado. Como en cancha fue
+          // empate, el que tenga más en `fullTime` (que suma la tanda) ganó.
+          const fh = fullTime?.home ?? 0;
+          const fa = fullTime?.away ?? 0;
+          if (fh > fa) winnerTeam = "team1";
+          else if (fa > fh) winnerTeam = "team2";
+        }
       }
       return {
         sql: `INSERT INTO matches (external_id, phase, group_name, team1, team2, team1_flag, team2_flag, match_date, venue, score1, score2, winner_team, status)
