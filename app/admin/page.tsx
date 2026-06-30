@@ -26,6 +26,7 @@ function AdminContent() {
   const [editTeam2, setEditTeam2] = useState("");
   const [editDate, setEditDate] = useState("");
   const [editVenue, setEditVenue] = useState("");
+  const [editAdvancer, setEditAdvancer] = useState<"team1" | "team2" | "">("");
   const [saving, setSaving] = useState(false);
   const [phaseFilter, setPhaseFilter] = useState("group");
   // Mantenimiento / limpieza de partidos huérfanos
@@ -83,6 +84,7 @@ function AdminContent() {
     setEditTeam1(m.team1); setEditTeam2(m.team2);
     setEditDate(m.match_date ? m.match_date.slice(0, 16) : "");
     setEditVenue(m.venue ?? "");
+    setEditAdvancer(m.winner_team ?? "");
   }
 
   async function deleteUser(u: AdminUser) {
@@ -153,6 +155,10 @@ function AdminContent() {
       };
       if (editScore1 !== "" && editScore2 !== "") {
         body.score1 = Number(editScore1); body.score2 = Number(editScore2); body.status = "finished";
+      }
+      // En eliminatorias mandamos quién clasifica (incluso vacío, para poder borrarlo)
+      if (editMatch.phase !== "group") {
+        body.winner_team = editAdvancer || null;
       }
       const res = await fetch(`/api/admin/matches/${editMatch.id}`, {
         method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
@@ -412,6 +418,32 @@ function AdminContent() {
                   <p className="text-xs text-gray-700 flex-1">Dejá vacío si el partido aún no terminó</p>
                 </div>
               </div>
+
+              {editMatch.phase !== "group" && (
+                <div>
+                  <label className="text-[10px] text-gray-600 font-bold uppercase tracking-wider mb-1 block">
+                    ¿Quién clasifica? <span className="text-gray-700 normal-case font-medium">(en caso de empate / penales)</span>
+                  </label>
+                  <div className="flex gap-2">
+                    {([
+                      ["team1", `${editMatch.team1_flag} ${editTeam1 || editMatch.team1}`],
+                      ["team2", `${editMatch.team2_flag} ${editTeam2 || editMatch.team2}`],
+                      ["", "Sin definir"],
+                    ] as const).map(([val, label]) => {
+                      const active = editAdvancer === val;
+                      return (
+                        <button key={val || "none"} type="button"
+                          onClick={() => setEditAdvancer(val as "team1" | "team2" | "")}
+                          className={`flex-1 py-2.5 px-2 rounded-xl text-xs font-bold truncate transition-all ${
+                            active ? "bg-[#f97316] text-black" : "bg-[#1a1a1a] border border-[#2e2e2e] text-gray-400"
+                          }`}>
+                          {label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
 
               <div>
                 <label className="text-[10px] text-gray-600 font-bold uppercase tracking-wider mb-1 block">Fecha y hora</label>

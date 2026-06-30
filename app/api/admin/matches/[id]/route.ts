@@ -15,6 +15,9 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   const match = await dbGet("SELECT id FROM matches WHERE id = ?", [matchId]);
   if (!match) return NextResponse.json({ error: "Partido no encontrado" }, { status: 404 });
 
+  // El clasificado solo se actualiza si el request lo incluye. Cuando viene,
+  // se setea directo (permite asignar o borrar el clasificado en eliminatorias).
+  const winnerProvided = winner_team !== undefined;
   const advancer: string | null =
     winner_team === "team1" || winner_team === "team2" ? winner_team : null;
 
@@ -29,7 +32,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       match_date = COALESCE(?, match_date),
       venue = COALESCE(?, venue),
       status = COALESCE(?, status),
-      winner_team = COALESCE(?, winner_team)
+      winner_team = CASE WHEN ? = 1 THEN ? ELSE winner_team END
     WHERE id = ?
   `, [
     score1 ?? null, score2 ?? null,
@@ -37,7 +40,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     team1_flag ?? null, team2_flag ?? null,
     match_date ?? null, venue ?? null,
     status ?? null,
-    advancer,
+    winnerProvided ? 1 : 0, advancer,
     matchId,
   ]);
 
